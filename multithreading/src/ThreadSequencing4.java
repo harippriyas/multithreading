@@ -16,8 +16,7 @@ public class ThreadSequencing4 implements Runnable{
     public static AtomicInteger counter = new AtomicInteger(1);
 
     public static Semaphore zeroSem = new Semaphore(1);
-    public static Semaphore oddSem = new Semaphore(1);
-    public static Semaphore evenSem = new Semaphore(1);
+    public static Semaphore numSem = new Semaphore(1);
     private int threadId;
     public ThreadSequencing4(int num){
         this.threadId = num;
@@ -29,21 +28,10 @@ public class ThreadSequencing4 implements Runnable{
                 if(threadId == 0) {
                     zeroSem.acquire();
                     System.out.print("0");
-                    if(counter.get() % 2 == 0) {
-                        evenSem.release();
-                    }
-                    else {
-                        oddSem.release();
-                    }
-
-                }
-                else if(threadId == 1) {
-                    oddSem.acquire();
-                    System.out.print(counter.getAndIncrement());
-                    zeroSem.release();
+                    numSem.release();
                 }
                 else {
-                    evenSem.acquire();
+                    numSem.acquire();
                     System.out.print(counter.getAndIncrement());
                     zeroSem.release();
                 }
@@ -58,18 +46,15 @@ public class ThreadSequencing4 implements Runnable{
         ExecutorService executorService = Executors.newFixedThreadPool(5);
         ThreadSequencing4 t1 = new ThreadSequencing4(0);
         ThreadSequencing4 t2 = new ThreadSequencing4(1);
-        ThreadSequencing4 t3 = new ThreadSequencing4(2);
 
         try {
             zeroSem.acquire();
-            oddSem.acquire();
-            evenSem.acquire();
+            numSem.acquire();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
         executorService.submit(t1);
         executorService.submit(t2);
-        executorService.submit(t3);
 
         zeroSem.release();
         try {
