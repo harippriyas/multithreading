@@ -1,3 +1,8 @@
+/**
+ * Design a bathroom system with the following constraints:
+ * Men and women cannot be in the bathroom at the same time.
+ * There can be max 3 employees in the bathroom simultaneously.
+ */
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
