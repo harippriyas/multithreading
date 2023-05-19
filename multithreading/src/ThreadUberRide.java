@@ -1,3 +1,8 @@
+/**
+ * Design an algorithm whereby either an Uber ride can have all democrats or republicans or 2 Dems and 2 Republicans.
+ * Model the ride requestors as threads. When all the threads are seated,
+ * any one of the four threads can invoke the method drive()
+ */
 import java.util.ArrayList;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
