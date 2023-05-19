@@ -1,52 +1,51 @@
+/**
+ * A barbershop consists of a waiting room with n chairs. If there are no customers, the barber goes to sleep.
+ * Customer enters and wakes him up. If he is busy, the customer sits in the chair.
+ * If there are no free chairs, he leaves.
+ */
+
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ThreadBarberShop {
 
-	private Semaphore customerArrived = new Semaphore(0);
-	private Semaphore barberStart = new Semaphore(0);
-	private Semaphore barberDone = new Semaphore(0);
-	private int numCustomers = 0;
-	
+	private Semaphore barberSeat = new Semaphore(0);
+	private static Semaphore customerArrived = new Semaphore(0);
+	private static AtomicInteger numCustomers = new AtomicInteger(0);
+	private static int MAX_SEATS = 5;
+
 	public void customerArrived() throws InterruptedException
 	{
-		synchronized(this)
-		{
-			if(numCustomers == 3)
-			{
-				System.out.println(Thread.currentThread().getName() + " is denied");
-				return;
-			}
-			
-			numCustomers++;
+		if(numCustomers.incrementAndGet() > MAX_SEATS) {
+			System.out.println(Thread.currentThread().getName() + " is denied");
+			return;
 		}
 		customerArrived.release();
-		barberStart.acquire();
-		barberDone.acquire();
-		synchronized(this)
-		{
-			numCustomers--;
-		}
+		System.out.println(Thread.currentThread().getName() + " is waiting");
+		barberSeat.acquire();
 		System.out.println(Thread.currentThread().getName() + " is done");
 	}
 	
-	public void getService() throws InterruptedException
-	{
-		int servicedClients = 0;
-		while(servicedClients < 10)
-		{
+	public void getService() throws InterruptedException {
+		// wait for the first customer to arrive
+		customerArrived.acquire();
+		// service waiting customers
+		while (numCustomers.get() > 0) {
+			Thread.sleep(20);
+			numCustomers.decrementAndGet();
+			barberSeat.release();
+			// wait for another customer to arrive before checking counts
+			// this ensures the barber thread is alive when there is a break between customers
 			customerArrived.acquire();
-			barberStart.release();
-			Thread.sleep(200);
-			barberDone.release();
-			servicedClients++;
 		}
+
 	}
 	
 	public static void main(String[] args)
 	{
 		ThreadBarberShop obj = new ThreadBarberShop();
-		
+
 		Runnable r1 = () -> {
 			try {
 				obj.getService();
@@ -57,7 +56,7 @@ public class ThreadBarberShop {
 		};
 		Thread barber = new Thread(r1);
 		barber.start();
-				
+
 		ArrayList<Thread> threads = new ArrayList<Thread>();
 		for(int i=0; i<10; i++)
 		{
@@ -71,7 +70,7 @@ public class ThreadBarberShop {
 			};
 			threads.add(new Thread(r2));
 		}
-		
+
 		for(Thread t: threads)
 		{
 			t.start();
@@ -82,7 +81,7 @@ public class ThreadBarberShop {
 				e.printStackTrace();
 			}
 		}
-		
+
 		for(Thread t: threads)
 		{
 			try {
@@ -92,7 +91,8 @@ public class ThreadBarberShop {
 				e.printStackTrace();
 			}
 		}
-		
-		
+		// Allow the barber thread to exit
+		customerArrived.release();
+
 	}
 }
