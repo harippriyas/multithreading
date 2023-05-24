@@ -1,6 +1,6 @@
 # Concurrency
 Fundamental concepts about multithreading.
-### Basics
+## Basics
 #### Concurrency vs Parallelism
 Concurrency == multi threading. Concurrent execution alternates doing a little of each task until both are all complete.
 Concurrency allows a program to make progress even when certain parts are blocked.
@@ -42,7 +42,7 @@ Starting a thread depends on the OS. Even if you set priority, no guarantee that
 - Call executor.shutdown() (terminate after running and queued tasks are done) or executor.shutdownNow() (terminate after the running threads are done).
 - With Callable, call Future.get(timeout) or Future.cancel() where it tries to stop.
 
-### Executor Framework
+## Executor Framework
 The executor framework manages thread pool. It provides ways to create thread pools of different types.
 <br>
 | Scenario            | Thread pool type                                                                                                                                                |
@@ -58,7 +58,7 @@ The executor framework manages thread pool. It provides ways to create thread po
 Runnable threads cannot return any value, but Callable can.<br/>
 Executor's execute() for runnable and submit() for callable and runnable, returns Future. Using Future, use isDone() to check the status and get() to get the returned Object. The get() is a blocking call.
 
-### Inter-Thread communication
+## Inter-Thread communication
 - State: Class/instance volatile variables
 - Data: Heap is shared b/w threads and stack is not shared.
 - Signal: wait/notify, condition, semaphore.
@@ -68,7 +68,7 @@ If there is just one read thread and one write thread, just volatile is enough. 
 #### ThreadLocal
 Way to store data that is private to the thread but accessible to all classes/methods that are invoked by the thread. 
 
-### Thread Synchronization Methods
+## Thread Synchronization Methods
 <i>Amazon: What are thread synchronization methods, how do they use CPU time slice and compare their efficiency?</i><br/>
 - wait/notifyAll()
 - condition locks
@@ -100,7 +100,7 @@ Blocks until latch.countDown() is called 3 times (like by each child thread when
 #### Cyclic Barrier
 Helps to synchronize threads. Wait for all threads to reach a particular point before proceeding. Can be reset for repeated sync.
 
-### Locking Mechanisms
+## Locking Mechanisms
 - synchronized
 - ReentrantLock - added features
 - ReadWriteLock - if reads > writes. Read locks blocked until write lock is held. Reads run in parallel when write lock is released.
@@ -115,7 +115,7 @@ mylock.lock()
 ```
 More features like lock interruptibly, specify timeout, fairness (provide lock to the longest waiting thread), tryLock,etc.
 
-### Deadlocks
+## Deadlocks
 #### Deadlock vs Livelock vs Starvation
 Deadlock happens in the OS, where a process is put in a wait state. Livelock happens in code, where the processes are running but keep checking for some resource and dont progress. Starvation happens when the low priority processes are blocked by high priority threads.
 <br/>
