@@ -42,6 +42,19 @@ Starting a thread depends on the OS. Even if you set priority, no guarantee that
 - Call executor.shutdown() (terminate after running and queued tasks are done) or executor.shutdownNow() (terminate after the running threads are done).
 - With Callable, call Future.get(timeout) or Future.cancel() where it tries to stop.
 
+#### Singleton creation
+Lazy loading, memory efficient and thread safe. The object is created only once, when the SingletonHolder class is loaded.
+```
+public class Singleton {
+    public static class SingletonHolder {
+        public static final Singleton HOLDER_INSTANCE = new Singleton();
+    }
+
+    public static Singleton getInstance() {
+        return SingletonHolder.HOLDER_INSTANCE;
+    }
+}
+```
 ## Executor Framework
 The executor framework manages thread pool. It provides ways to create thread pools of different types.
 <br>
