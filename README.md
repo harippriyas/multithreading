@@ -91,16 +91,24 @@ Way to store data that is private to the thread but accessible to all classes/me
 TBD on the rest of the question
 #### Condition Locks
 ```
-Lock lock = new ReentrantLock();
-Condition added = lock.newCondition();
+Lock pubsubMonitor = new ReentrantLock();
+Condition added = pubsubMonitor.newCondition();
 public void producer() { ...
-  added.signal();
-... }
+  pubsubMonitor.lock();
+  try{
+       added.signal();
+  } finally {
+   pubsubMonitor.unlock();
+  }
+}
 public void consumer() { ...
-  added.await();
-... }
+   pubsubMonitor.lock();
+   try{
+      while(condition)  // while clause to handle when the thread is woken up without a signal (spurious wake)
+        added.await();  
+... 
 ```
-Better than wait/notify - can be used across methods, can be made to be fair and you can try to acquire lock. Downside is that the signal could be missed f the consumer is not ready.
+Better than wait/notify - can be used to fine tune which thread to wake up when multiple are waiting on the same lock. For example, BlockingQueue implementation uses one lock for the queue but different conditions - full and empty. The put() cares about full condition while take() cares about empty. If we didnt have this granularity and just had notify(), then a take() thread might be woken up when queue is already empty. A notifyAll() would make all threads to unnecessarily contend for resources. Downside is that the signal could be missed f the consumer is not ready.
 
 #### Countdown Latch
 Wait for threads/operations to finish.
