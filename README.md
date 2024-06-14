@@ -129,13 +129,36 @@ Helps to synchronize threads. Wait for all threads to reach a particular point b
 - Semaphores - limits the number of concurrent access.
 
 #### ReentrantLock vs Synchronized
-```synchronized(obj)``` versus
+```
+synchronized(obj) {
+   // update resource
+}
+```
+versus
 ```
 ReentrantLock mylock = new ReentrantLock();
 mylock.lock()
+try {
+   // update resource
+}
+finally {
+   mylock.unlock();
+}
 ```
-More features like lock interruptibly, specify timeout, fairness (provide lock to the longest waiting thread), tryLock,etc.
-
+ReentrantLock supports features like:
+- trylock with option for timeout.
+- lock interruptibly
+- fair lock. All threads asking for a lock are stored in a queue. If you specify fairness=true when creating the lock object, it always gives the lock to threads in FIFO order. Default is unfair. Lets say Thread1 has the lock and 3 other threads are in a queue. Right when the lock is released if a Thread5 comes and asks for lock, it will be given. This allows faster operation as queue processing takes time.
+- lock() can be called more than once. Nothing happens as the thread already has the lock. The hold count increasses and the lock must be released the same number of times.
+  ```
+  void accessResource(){
+      lock.lock();
+      if(condition)
+           accessResource();
+      lock.unlock()
+  }
+  ```
+  
 ## Deadlocks
 #### Deadlock vs Livelock vs Starvation
 Deadlock happens in the OS, where a process is put in a wait state. Livelock happens in code, where the processes are running but keep checking for some resource and dont progress. Starvation happens when the low priority processes are blocked by high priority threads.
