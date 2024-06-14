@@ -1,166 +1,82 @@
-import java.util.concurrent.atomic.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class ThreadSequenceFizzBuzz {
 
-	public volatile AtomicInteger count = new AtomicInteger(1);
-	
-	public synchronized void printFizz()
-	{
-		while(count.get() < 30)
-		{
-			if(count.get() % 3 == 0 && count.get() % 5 != 0)
-			{
-				System.out.print("Fizz ");
-				count.incrementAndGet();
-				notifyAll();
-			}
-			else {
-				try {
-						wait();
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-			}
-		}
+    public volatile AtomicInteger count = new AtomicInteger(1);
+    public final ReentrantLock printLock = new ReentrantLock();
+    public Condition lockCondition = printLock.newCondition();
+    public static enum TYPE { FIZZ, BUZZ, FIZZBUZZ, NUM};
 
-	}
-	
-	public synchronized void printBuzz()
-	{
-		while(count.get() < 30)
-		{
-			if(count.get() % 3 != 0 && count.get() % 5 == 0)
-			{
-				System.out.print("Buzz ");
-				count.incrementAndGet();
-				notifyAll();
-			}
-			else {
-				try {
-						wait();
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-			}
-		}
+    public static void main(String[] args)
+    {
+        ThreadSequenceFizzBuzz obj = new ThreadSequenceFizzBuzz();
+        obj.doPrint();
+    }
 
-	}
-	
-	public synchronized void printFizzBuzz()
-	{
-		while(count.get() < 30)
-		{
-			if(count.get() % 15 == 0)
-			{
-				System.out.print("FizzBuzz ");
-				count.incrementAndGet();
-				notifyAll();
-			}
-			else {
-				try {
-						wait();
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-			}
-		}
+    public void doPrint()
+    {
+        Printer fizzThread = new Printer(TYPE.FIZZ.ordinal());
+        Printer buzzThread = new Printer(TYPE.BUZZ.ordinal());
+        Printer fizzbuzzThread = new Printer(TYPE.FIZZBUZZ.ordinal());
+        Printer numThread = new Printer(TYPE.NUM.ordinal());
+        try (ExecutorService executor = Executors.newFixedThreadPool(4)) {
+            executor.execute(fizzThread::execute);
+            executor.execute(buzzThread::execute);
+            executor.execute(fizzbuzzThread::execute);
+            executor.execute(numThread::execute);
+            executor.shutdown();
+        }
 
-	}
-	
-	public synchronized void printNum()
-	{
-		while(count.get() < 30)
-		{
-			if(count.get() % 5 != 0 && count.get() % 3 != 0)
-			{
-				System.out.print(count.getAndIncrement() + " ");
-				notifyAll();
-			}
-			else {
-				try {
-						wait();
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-			}
-		}
-	}
-	
-	/*public synchronized void printValue(String type)
-	{
-		while(count.get() < 30)
-		{
-			boolean foundMatch = false;
-		
-			if(type.equals("fizz"))
-			{
-				if(count.get() % 3 == 0 && count.get() % 5 != 0)
-				{
-					System.out.print("Fizz ");
-					count.incrementAndGet();
-					foundMatch = true;
-				}
-			}
-			else if(type.equals("buzz"))
-			{
-				if(count.get() % 5 == 0 && count.get() % 3 != 0)
-				{
-					System.out.print("Buzz ");
-					count.incrementAndGet();
-					foundMatch = true;
-				}
-			}
-			else if(type.equals("fizzbuzz"))
-			{
-				if(count.get() % 15 == 0)
-				{
-					System.out.print("FizzBuzz ");
-					count.incrementAndGet();
-					foundMatch = true;
-				}
-			}
-			else
-			{
-				System.out.print(count.getAndIncrement() + " ");
-				foundMatch = true;
-			}
-			
-			notifyAll();
-			
-			try {
-					wait();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-		}
-		notifyAll();
-		System.out.println("End of run for " + type);
-	}*/
-	
-	public void createThreads()
-	{
-		Thread t1 = new Thread(() -> printFizz());
-		Thread t2 = new Thread(() -> printBuzz());
-		Thread t3 = new Thread(() -> printFizzBuzz());
-		Thread t4 = new Thread(() -> printNum());
-		t4.start();
-		t3.start();
-		t2.start();
-		t1.start();
-		
-	}
-	
-	public static void main(String[] args)
-	{
-		ThreadSequenceFizzBuzz obj = new ThreadSequenceFizzBuzz();
-		obj.createThreads();
+    }
 
-	}
+    class Printer {
+        private final int type;
 
+        public Printer(int type){
+            this.type = type;
+        }
+        public void execute(){
+            while(count.get() < 20)
+            {
+                printLock.lock();
+                try{
+                    boolean executeDone = false;
+                    if (count.get() % 3 == 0 && count.get() % 5 == 0 && type == TYPE.FIZZBUZZ.ordinal()){
+                        executeDone=true;
+                        System.out.print(TYPE.FIZZBUZZ.name());
+                    }
+                    else if (count.get() % 3 == 0 && count.get() % 5 != 0 && type == TYPE.FIZZ.ordinal()){
+                        executeDone=true;
+                        System.out.print(TYPE.FIZZ.name());
+                    }
+                    else if (count.get() % 3 != 0 && count.get() % 5 == 0 && type == TYPE.BUZZ.ordinal()){
+                        executeDone=true;
+                        System.out.print(TYPE.BUZZ.name());
+                    }
+                    else if (count.get() % 3 != 0 && count.get() % 5 != 0 && type == TYPE.NUM.ordinal()){
+                        executeDone=true;
+                        System.out.print(count.get());
+
+                    }
+
+                    if(executeDone){
+                        System.out.print(" ");
+                        count.getAndIncrement();
+                        lockCondition.signalAll();
+                    }
+                    else {
+                        lockCondition.await();
+                    }
+                } catch (InterruptedException e) {
+                    // throw new RuntimeException(e);
+                } finally {
+                    printLock.unlock();
+                }
+            }
+        }
+    }
 }
