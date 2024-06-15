@@ -1,4 +1,4 @@
-![image](https://github.com/harippriyas/multithreading/assets/33924695/b41f0125-4d67-4856-b73f-4ee41903d960)# Concurrency
+# Concurrency
 Fundamental concepts about multithreading.
 ## Basics
 #### Concurrency vs Parallelism
