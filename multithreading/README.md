@@ -77,6 +77,12 @@ Example:  [ThreadSequencing3.java](https://github.com/harippriyas/multithreading
 
 ## Write Heavy System
 
+## Scatter Gather
+Reference: https://www.youtube.com/watch?v=nDE1bsy10Yo&list=PLhfHPmPYPPRmHL24Ry8rzni2XgwFeooVE&index=3 <br>
+![ScatterGather](src/ScatterGather.java)
+
+In additiom to CountDownLatch and CompletableFuture, you can also use Locks/Conditions, Phaser, Futures/Callbacks.
+
 ## Producer Consumer
 ### Using BlockingQueue
 ```
