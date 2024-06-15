@@ -76,3 +76,34 @@ Example:  [ThreadSequencing3.java](https://github.com/harippriyas/multithreading
 ## Read Heavy System
 
 ## Write Heavy System
+
+## Producer Consumer
+Reference: https://www.youtube.com/watch?v=4BEzgPlLKTo
+#### Models
+<b>Topic</b>: 
+- variables: name, ID (UUID.randomUUID().toString()), List<Subscriber>, List<Message>.
+- addMessage() - synchronized
+- addSubscriber()
+
+<b>Subscriber implements ISubscriber</b>
+- variables: id, offset
+- method: consume()
+
+#### Handlers
+<b>TopicHandler</b>
+- variable: topic
+- publish() - start the subscriber worker threads / notify existing threads
+
+<b>SubscriberWorker thread</b>: 
+In the run method:
+- synchronize on Subscriber object
+- wait until we have a message with ID > offset
+- iterate through messages, invoke consume() on the subscriber. Then compareAndSet the new offset.
+
+#### Entry point
+<b>Queue object</b>
+- variables: map of topicId, TopicHandler
+- createTopic(name) -- create object and the handler. Add to map.
+- subscribe(topicId, ISubscribe) -- get topic object and add to subscriber list
+- publish(topicId, message) - get the TopicHandler and call its publish() in a thread
+- resetOffset(topicId, ISubscribe) - get the topic object, get the subscriber object from it, set the offset and then start the worker.
