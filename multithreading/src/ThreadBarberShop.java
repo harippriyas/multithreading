@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ThreadBarberShop {
 
+	// num permits = 0 means that the semaphore must be released first before it can be acquired
 	private Semaphore barberSeat = new Semaphore(0);
 	private static Semaphore customerArrived = new Semaphore(0);
 	private static AtomicInteger numCustomers = new AtomicInteger(0);
@@ -21,8 +22,10 @@ public class ThreadBarberShop {
 			System.out.println(Thread.currentThread().getName() + " is denied");
 			return;
 		}
+		// this triggers the barber to start service for this customer
 		customerArrived.release();
 		System.out.println(Thread.currentThread().getName() + " is waiting");
+		// this semaphore is released only after service is done. It simply blocks so that the print stmt is done correctly.
 		barberSeat.acquire();
 		System.out.println(Thread.currentThread().getName() + " is done");
 	}
