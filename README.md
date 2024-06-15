@@ -207,13 +207,13 @@ Tools that help take a thread dump like jstack or JConsole can help see deadlock
 <i>VMWare: In which scenario could we use deadlock?</i><br/>
 Maybe for security. Prevent incorrect access. Maybe to assess about resources.
 
-### Distributed Concurrency Control
+## Distributed Concurrency Control
 Let's take a distributed movie booking application. User 1 and User 2 are trying to book seat 2. If their requests land on two different servers, none of the locking mechanisms described here will help. *** ```synchronized``` and other locks are local to a process in a given machine.***. This is handled by concurrency control techniques at the DB layer. The options are:
 - Optimistic Concurrency Control
 - Pessimistic Concurrency Control
 Learn more @ https://www.youtube.com/watch?v=D3XhDu--uoI
 
-#### Latest in Concurrency
+## Latest in Concurrency
 In Java 21, there is Virtual threads:
 - alternative implementation of Thread and ExecutorService. 
 - OS doesn't know about them
