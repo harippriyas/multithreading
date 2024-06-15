@@ -78,6 +78,27 @@ Example:  [ThreadSequencing3.java](https://github.com/harippriyas/multithreading
 ## Write Heavy System
 
 ## Producer Consumer
+### Using BlockingQueue
+```
+BlockingQueue<Item> queue = new ArrayBlockingQueue<>(10);
+Runnable producer = () -> {
+     queue.put(createItem());  // blocks if queue is full
+}
+new Thread(producer).start();
+new Thread(producer).start();
+
+Runnable consumer = () -> {
+    while(true){
+       Item i = queue.take();  // blocks if queue is empty
+       process(i);
+   }
+}
+new Thread(consumer).start();
+new Thread(consumer).start();
+
+Thread.sleep(1000);
+```
+### Custom Implementation
 Reference: https://www.youtube.com/watch?v=4BEzgPlLKTo
 #### Models
 <b>Topic</b>: 
