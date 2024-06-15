@@ -1,4 +1,4 @@
-# Concurrency
+![image](https://github.com/harippriyas/multithreading/assets/33924695/b41f0125-4d67-4856-b73f-4ee41903d960)# Concurrency
 Fundamental concepts about multithreading.
 ## Basics
 #### Concurrency vs Parallelism
@@ -213,13 +213,20 @@ Let's take a distributed movie booking application. User 1 and User 2 are trying
 - Pessimistic Concurrency Control
 Learn more @ https://www.youtube.com/watch?v=D3XhDu--uoI
 
-## Latest in Concurrency
+## Other Concepts
+### CompletableFuture
+https://www.youtube.com/watch?v=ImtZgX1nmr8
+Order processing may involve multiple steps like FetchOrder, EnrichOrder, Payment, Dispatch, Notification. These are inter-related, so we would have to execute them sequentially. However we want the main thread tp process multiple orders in parallel. CompletableFuture allows us to combinee these 5 steps into one thread, each as a subtask that executes sequentially. This allows the main program to run many of these CompletableFutures in parallel. It uses ForkJoinPool internally to run these subtasks.<br/>
+This is still clunky to use for large projects with much more logic between each step. Hence RxJava is used instead as it is feature rich and easy to read.
+
+### Latest Concepts
 In Java 21, there is Virtual threads:
 - alternative implementation of Thread and ExecutorService. 
 - OS doesn't know about them
   - jvm concept
   - stack lives on heap. regular thread needs to reserve stack space like 1MB per thread. with heap, you can use as little as you want.
 - Cheap to create than platform threads.
+Scenario: Lets say we want to get the price of 10000 products and update our DB. We have a for loop that creates 10 threads at a time. As the fetch and DB write are IO operations, most of the time is spent being idle. So CachedThreadPool might end up spawning more and more threads, which consumes memory. One solution is to use Reactive programming. The thread simply provides a callback to the reactive framework and ends. The reactive framework takes care of managing this and will invoke the callback method when it receives the response for the IO operation. The one downside is that reactive programming requires using another library like Spring Web Flux and is hard to read/debug. The solution is virtual threads that are natively supported by the Thread and Executor class.
 
 Structured consistency is in experimental feature state. Helps with fork join and handle errors, race conditions, etc at parent level.
 
