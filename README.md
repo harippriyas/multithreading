@@ -67,6 +67,16 @@ The executor framework manages thread pool. It provides ways to create thread po
 | Truly parallel tasks | ForkJoinPool - Suitable if your task can be forked into subtasks and then join them when done to return a result. Example: sorting, matrix multiplication, tree traversal, move finder for a game. https://www.baeldung.com/java-fork-join |
 | Run tasks based on frequency or time delay | ScheduledThreadPool <br>```TimeUnit t = TimeUnit.SECONDS;```<br/>```ScheduledExecutorService executor = Executors.newScheduledThreadPool(3);```<br/>```executor.submit(task1); -- starts immediately```<br/>```executor.schedule(task2, 5, t); -- starts after 5s and runs once```<br/>```executor.scheduleAtFixedRate(task3, 5, 10, t); -- starts after 5s and repeats every 10s```<br/>```executor.scheduleWithFixedDelay(task4, 5, 10, t); -- starts after 5s and runs 10s after previous run ends.``` |
 
+#### Ideal Thread pool size
+Factors to consider when determining the thread pool size for ```FixedThreadPool```:
+- No. of CPU cores
+- Type of task.
+  - If it is a CPU bound task, just specify the pool size to align with the number of cores.
+  - If it is an IO bound task, determine the approx time it takes and calculate it.
+The general formula is ```No. of cores * [1 + wait time/CPU time]```. For CPU bound, wait time is 0.
+
+https://www.youtube.com/watch?v=ErNre5varF8
+
 #### Callable vs Future
 Runnable threads cannot return any value, but Callable can.<br/>
 Executor's execute() for runnable and submit() for callable and runnable, returns Future. Using Future, use isDone() to check the status and get() to get the returned Object. The get() is a blocking call.
