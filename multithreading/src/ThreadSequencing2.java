@@ -5,54 +5,68 @@
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
-public class ThreadSequencing2 implements Runnable{
-    public static int NUM_ITERATIONS = 10;
-    private int threadId;
-    private Semaphore currSem, nextSem;
+public class ThreadSequencing2 {
+    private static int NUM_ITERATIONS = 10;
+    private static enum TYPE {ONE, TWO, THREE};
 
-    public ThreadSequencing2(int num, Semaphore curr, Semaphore next){
-        this.threadId = num;
-        this.currSem = curr;
-        this.nextSem = next;
+    private State currState;
+    private final ReentrantLock printerLock;
+    private final Condition printConditiom;
+    
+    public ThreadSequencing2() {
+        currState = new State(TYPE.ONE.ordinal(), 0);
+        printerLock = new ReentrantLock();
+        printConditiom = printerLock.newCondition();
     }
 
-    public void run() {
+    public void startPrintThreads(){
+        State one = new State(TYPE.ONE.ordinal(), TYPE.TWO.ordinal()) ;
+        State two = new State(TYPE.TWO.ordinal(), TYPE.THREE.ordinal()) ;
+        State three = new State(TYPE.THREE.ordinal(), TYPE.ONE.ordinal()) ;
+
+        ExecutorService executor = Executors.newFixedThreadPool(3);
+        executor.execute(()->print(one));
+        executor.execute(()->print(two));
+        executor.execute(()->print(three));
+        executor.shutdown();
+
+    }
+
+    public void print(State threadState){
         for(int i=0; i<NUM_ITERATIONS; i++) {
+            printerLock.lock();
             try {
-                currSem.acquire();
-                System.out.print(this.threadId + " ");
-                nextSem.release();
+                while (currState.currType != threadState.currType) {
+                    printConditiom.await();
+                }
+                System.out.print(threadState.currType + 1 + " ");
+                currState.currType = threadState.nextType;
+                printConditiom.signalAll();
+
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
+            } finally {
+                printerLock.unlock();
             }
-
         }
     }
-
     public static void main(String[] args){
-        ExecutorService executorService = Executors.newFixedThreadPool(5);
-        Semaphore sem1 = new Semaphore(1);
-        Semaphore sem2 = new Semaphore(1);
-        Semaphore sem3 = new Semaphore(1);
-        ThreadSequencing2 t1 = new ThreadSequencing2(1, sem1, sem2);
-        ThreadSequencing2 t2 = new ThreadSequencing2(2, sem2, sem3);
-        ThreadSequencing2 t3 = new ThreadSequencing2(3, sem3, sem1);
-
-        try {
-            sem1.acquire();
-            sem2.acquire();
-            sem3.acquire();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        executorService.submit(t1);
-        executorService.submit(t2);
-        executorService.submit(t3);
-
-        sem1.release();
-        executorService.shutdown();
+        ThreadSequencing2 printer = new ThreadSequencing2();
+        printer.startPrintThreads();
     }
+
+    class State {
+        private int currType;
+        private int nextType;
+
+        public State(int currType, int nextType) {
+            this.currType = currType;
+            this.nextType = nextType;
+        }
+
+    }
+
 }
