@@ -9,6 +9,11 @@ public class ProducerConsumer {
     public final Condition qNotEmpty = queueLock.newCondition();
     private final int maxItems = 2;
 
+    /** Note: To implement this without ReentrantLock:
+     * - make this method as synchronized
+     * - replace Condition with Object. Eg. Object qNotFull
+     * - replace await/signalAll with wait() and notifyAll()
+     **/
     public void put(String item){
         queueLock.lock();
         try{
