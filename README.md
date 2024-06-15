@@ -196,3 +196,6 @@ Tools that help take a thread dump like jstack or JConsole can help see deadlock
 #### Using Deadlocks
 <i>VMWare: In which scenario could we use deadlock?</i><br/>
 Maybe for security. Prevent incorrect access. Maybe to assess about resources.
+
+## Problems
+Check out the README at https://github.com/harippriyas/multithreading/tree/main/multithreading
