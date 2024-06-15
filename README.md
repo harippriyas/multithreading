@@ -207,5 +207,15 @@ Tools that help take a thread dump like jstack or JConsole can help see deadlock
 <i>VMWare: In which scenario could we use deadlock?</i><br/>
 Maybe for security. Prevent incorrect access. Maybe to assess about resources.
 
+#### Latest in Concurrency
+In Java 21, there is Virtual threads:
+- alternative implementation of Thread and ExecutorService. 
+- OS doesn't know about them
+  - jvm concept
+  - stack lives on heap. regular thread needs to reserve stack space like 1MB per thread. with heap, you can use as little as you want.
+- Cheap to create than platform threads.
+
+Structured consistency is in experimental feature state. Helps with fork join and handle errors, race conditions, etc at parent level.
+
 ## Problems
 Check out the README at https://github.com/harippriyas/multithreading/tree/main/multithreading
