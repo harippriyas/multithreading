@@ -11,7 +11,6 @@ public class ThreadUberRide {
 	private Semaphore demSemaphore = new Semaphore(0);
 	private Semaphore repSemaphore = new Semaphore(0);
 	private ReentrantLock lock = new ReentrantLock();
-	private CyclicBarrier barrier = new CyclicBarrier(4);
 	private int numDemocrats = 0;
 	private int numRepublicans = 0;
 	
@@ -64,7 +63,6 @@ public class ThreadUberRide {
 		
 		
 		System.out.println("Seated " + (isDemocrat? "Democrat" : "Republican"));
-		barrier.await();
 		
 		if(readyToRide)
 		{
