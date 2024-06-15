@@ -99,6 +99,10 @@ new Thread(consumer).start();
 Thread.sleep(1000);
 ```
 ### Custom Implementation
+Reference: https://www.youtube.com/watch?v=UOr9kMCCa5g&list=PLhfHPmPYPPRmHL24Ry8rzni2XgwFeooVE&index=2
+Source: [ProducerConsumer.java](src/ProducerConsumer.java)
+
+## Pub-Sub
 Reference: https://www.youtube.com/watch?v=4BEzgPlLKTo
 #### Models
 <b>Topic</b>: 
