@@ -99,7 +99,7 @@ new Thread(consumer).start();
 Thread.sleep(1000);
 ```
 ### Custom Implementation
-Reference: https://www.youtube.com/watch?v=UOr9kMCCa5g&list=PLhfHPmPYPPRmHL24Ry8rzni2XgwFeooVE&index=2
+Reference: https://www.youtube.com/watch?v=UOr9kMCCa5g&list=PLhfHPmPYPPRmHL24Ry8rzni2XgwFeooVE&index=2 <br/>
 Source: [ProducerConsumer.java](src/ProducerConsumer.java)
 
 ## Pub-Sub
