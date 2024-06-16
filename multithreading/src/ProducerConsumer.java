@@ -51,11 +51,12 @@ public class ProducerConsumer {
 
     public static void main(String[] args){
         final ProducerConsumer obj = new ProducerConsumer();
-        List<Thread> list = new ArrayList<>();
+        ExecutorService executor = Executors.newCachedThreadPool();
         for(int i=0; i<15; i++){
-            (new Thread(()->obj.put(UUID.randomUUID().toString()))).start();
-            (new Thread(()->obj.take())).start();
+            executor.submit(()->obj.put(UUID.randomUUID().toString()));
+            executor.submit(()->obj.take());
         }
+        executor.shutdown();ew Thread(()->obj.take())).start();
     }
 
 }
