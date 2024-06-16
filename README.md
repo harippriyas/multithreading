@@ -234,6 +234,12 @@ Once the tasks are identified, reviewing the resouces accessed, the dependencies
 Maybe for security. Prevent incorrect access. Maybe to assess about resources.
 
 ## Other Concepts
+### Java Classes
+- AtomicInteger: uses volatile and CAS (compare and swap) to update in atomic manner without locks. All classes in java.util.concurrent.atomic support lock-free, thread-safe programming on single variables.<br>
+  - Compare-And-Swap: an atomic instruction directly supported by most modern CPUs. Those instructions usually are much faster than synchronizing via locks. It compares the contents of a memory location to a given value and, only if they are the same, modifies the contents of that memory location to a given new value. All this is done as a single atomic operation. If the value has been updated by another thread at the same time, the write would fail.
+- Concurrent API -- classes in the java.util.concuurent package like Executor, CyclicBarrier, etc.
+- ConcurrentHashMap: map value is defined as volatile. The map is divided into segments. It is 32 by default but can be defined. No lock for read. Write lock is obtained for a segment. So you can have 32 threads modifying in parallel by default.
+- 
 ### JVM Memory Model & Guarantees
 The memory model is about using stack for thread level isolation and heap for sharing between threads. Stack stores local primitive variables while heap stores objects. [Learn more](https://dip-mazumder.medium.com/java-memory-model-a-comprehensive-guide-ba9643b839e#:~:text=The%20Java%20Memory%20Model%20(JMM,framework%20for%20safe%20multi%2Dthreading).<br/>
 <b>Visibility Guarantees</b><br/>
