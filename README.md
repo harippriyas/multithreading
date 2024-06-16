@@ -55,6 +55,10 @@ public class Singleton {
     }
 }
 ```
+> Note:
+> - Class loading may happen as soon as another class that references it is loaded or only when it is used (lazy loading). Even if loaded, it will be initialized only when it is accessed. Hence instantiation of the HOLDER_INSTANCE happens only when getInstance() is invoked.
+> - The common approach is double checked locking. that is not suitable if constructor does longer init. Another thread will see that the instance object is not null and will start using it even while init is in progress.
+
 ## Executor Framework
 The executor framework manages thread pool. It provides ways to create thread pools of different types.
 <br>
@@ -171,9 +175,13 @@ ReentrantLock supports features like:
  
 ## Deadlocks
 #### Deadlock vs Livelock vs Starvation
-Deadlock happens in the OS, where a process is put in a wait state. Livelock happens in code, where the processes are running but keep checking for some resource and dont progress. Starvation happens when the low priority processes are blocked by high priority threads.
+- Deadlock happens in the OS, where a set of processes are blocked because each process is holding a resource and waiting for another resource acquired by some other process.
+- Livelock happens in code, where the processes are running but keep checking for some resource and dont progress.
+- Starvation happens when the low priority processes are blocked by high priority threads.
 <br/>
-The following code causes deadlock.<br/>
+
+#### Causes of Deadlock
+- Nested Lock aquisition: The following code causes deadlock.<br/>
 ```
 thread1 -> method 1:
 synchronized(lockA){
@@ -188,19 +196,37 @@ Context switched<br/>
 Thread 2 runs and acquires lock B<br/>
 Deadlock!<br/>
 <b>Always lock in the same order.</b>
+- Circular lock dependency between processes.
+- resource contention
 
 #### Detecting Deadlocks
 <i>Amazon: How to detect deadlocks? What tools would you use?</i><br/>
-Tools that help take a thread dump like jstack or JConsole can help see deadlocks. Check for the following during code review:
+Symptoms:
+- Application becomes sluggish and is slow to respond.
+- High CPU usage as the threads are busy checking locks
+- High memory usage as the threads dont allow GC
+- no activity in logs, indicating that work is not being done.
+  
+Tools that help take a thread dump like jstack or JConsole can help see deadlocks. 
+Check for the following during code review:
 - nested synchronization
 - holds one lock while it tries to get another lock
 - no consistency in the way the locks are ordered and
 - there are no timeouts.
 
+#### Debugging
+- Take a thread dump using the jstack command-line tool or Java VisualVM tool. This generates a snapshot of the stack traces of all threads in the JVM and help you identify threads in BLOCKED or WAITING states, as well as locks or objects they are contending for.
+- Use same tools to monitor live threads, spot threads with high CPU usage, memory usage, or low throughput.
+- jdb command-line tool or Debugging feature in IDE can be used to attach to running JVM and inspect variables and expressions of threads. This will enable you to set breakpoints, watchpoints, or conditional expressions that will trigger when a deadlock occurs.
+
+Once the tasks are identified, reviewing the resouces accessed, the dependencies, etc will help find the root cause.
+
 #### Avoiding Deadlocks
 <i>How to avoid deadlocks?</i><br/>
-- Using ReentrantLock's tryLock with a timeout is better than synchronized. If you can't get the lock, release your other lock too and retry after sometime.
-- Avoid Nested Lock, dont wait indefinitely and dont use thread joins.
+- Use higher-level concurrency constructs, such as java.util.concurrent locks, synchronizers, or executors, as well as lock-free or wait-free algorithms or data structures that rely on atomic operations or optimistic concurrency control.
+- dont wait indefinitely and dont use thread joins. Using ReentrantLock's tryLock with a timeout is better than synchronized.
+- If you can't get the lock, release your other lock too and retry after sometime.
+- Avoid Nested or circular Lock. Use same lock ordering.
 - Lock Only What is Required.
 
 #### Using Deadlocks
@@ -208,14 +234,16 @@ Tools that help take a thread dump like jstack or JConsole can help see deadlock
 Maybe for security. Prevent incorrect access. Maybe to assess about resources.
 
 ## Distributed Concurrency Control
-Let's take a distributed movie booking application. User 1 and User 2 are trying to book seat 2. If their requests land on two different servers, none of the locking mechanisms described here will help. *** ```synchronized``` and other locks are local to a process in a given machine.***. This is handled by concurrency control techniques at the DB layer. The options are:
+Let's take a distributed movie booking application. User 1 and User 2 are trying to book seat 2. If their requests land on two different servers, none of the locking mechanisms described here will help.<br/>
+<b>```synchronized``` and other locks are local to a process in a given machine.</b>. This is handled by concurrency control techniques at the DB layer. The options are:
 - Optimistic Concurrency Control
 - Pessimistic Concurrency Control
+  
 Learn more @ https://www.youtube.com/watch?v=D3XhDu--uoI
 
 ## Other Concepts
 ### CompletableFuture
-https://www.youtube.com/watch?v=ImtZgX1nmr8
+https://www.youtube.com/watch?v=ImtZgX1nmr8 <br/>
 Order processing may involve multiple steps like FetchOrder, EnrichOrder, Payment, Dispatch, Notification. These are inter-related, so we would have to execute them sequentially. However we want the main thread tp process multiple orders in parallel. CompletableFuture allows us to combinee these 5 steps into one thread, each as a subtask that executes sequentially. This allows the main program to run many of these CompletableFutures in parallel. It uses ForkJoinPool internally to run these subtasks.<br/>
 This is still clunky to use for large projects with much more logic between each step. Hence RxJava is used instead as it is feature rich and easy to read.
 
