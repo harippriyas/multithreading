@@ -87,7 +87,7 @@ Executor's execute() for runnable and submit() for callable and runnable, return
 
 ## Inter-Thread communication
 - State: Class/instance volatile variables
-- Data: Heap is shared b/w threads and stack is not shared.
+- Data: Heap is shared b/w threads and stack is not shared. Stack contains local primitive variables while heap contains objects.
 - Signal: wait/notify, condition, semaphore.
 #### Volatile Keyword
 Tells the threads to read/write shared variables from main memory instead of cache. Ensures that all threads see the latest value.<br/>
@@ -233,21 +233,20 @@ Once the tasks are identified, reviewing the resouces accessed, the dependencies
 <i>VMWare: In which scenario could we use deadlock?</i><br/>
 Maybe for security. Prevent incorrect access. Maybe to assess about resources.
 
-## Distributed Concurrency Control
-Let's take a distributed movie booking application. User 1 and User 2 are trying to book seat 2. If their requests land on two different servers, none of the locking mechanisms described here will help.<br/>
-<b>```synchronized``` and other locks are local to a process in a given machine.</b>. This is handled by concurrency control techniques at the DB layer. The options are:
-- Optimistic Concurrency Control
-- Pessimistic Concurrency Control
-  
-Learn more @ https://www.youtube.com/watch?v=D3XhDu--uoI
-
 ## Other Concepts
+### JVM Memory Model & Guarantees
+The memory model is about using stack for thread level isolation and heap for sharing between threads. Stack stores local primitive variables while heap stores objects. [Learn more](https://dip-mazumder.medium.com/java-memory-model-a-comprehensive-guide-ba9643b839e#:~:text=The%20Java%20Memory%20Model%20(JMM,framework%20for%20safe%20multi%2Dthreading).<br/>
+<b>Visibility Guarantees</b><br/>
+```volatile & synchronized``` guarantee that changes to a variable done by one thread is visible to other threads. Volatile reads from main memory and immediately flushes write to main memory. syncronized reads from main memory when it enters the block and flushes to main memory while exiting.
+
+<b>happens-before consistency</b><br/>
+
 ### CompletableFuture
 https://www.youtube.com/watch?v=ImtZgX1nmr8 <br/>
 Order processing may involve multiple steps like FetchOrder, EnrichOrder, Payment, Dispatch, Notification. These are inter-related, so we would have to execute them sequentially. However we want the main thread tp process multiple orders in parallel. CompletableFuture allows us to combinee these 5 steps into one thread, each as a subtask that executes sequentially. This allows the main program to run many of these CompletableFutures in parallel. It uses ForkJoinPool internally to run these subtasks.<br/>
 This is still clunky to use for large projects with much more logic between each step. Hence RxJava is used instead as it is feature rich and easy to read.
 
-### Latest Concepts
+### Virtual Threads
 In Java 21, there is Virtual threads:
 - alternative implementation of Thread and ExecutorService. 
 - OS doesn't know about them
@@ -257,6 +256,14 @@ In Java 21, there is Virtual threads:
 Scenario: Lets say we want to get the price of 10000 products and update our DB. We have a for loop that creates 10 threads at a time. As the fetch and DB write are IO operations, most of the time is spent being idle. So CachedThreadPool might end up spawning more and more threads, which consumes memory. One solution is to use Reactive programming. The thread simply provides a callback to the reactive framework and ends. The reactive framework takes care of managing this and will invoke the callback method when it receives the response for the IO operation. The one downside is that reactive programming requires using another library like Spring Web Flux and is hard to read/debug. The solution is virtual threads that are natively supported by the Thread and Executor class.
 
 Structured consistency is in experimental feature state. Helps with fork join and handle errors, race conditions, etc at parent level.
+
+### Distributed Concurrency Control
+Let's take a distributed movie booking application. User 1 and User 2 are trying to book seat 2. If their requests land on two different servers, none of the locking mechanisms described here will help.<br/>
+<b>```synchronized``` and other locks are local to a process in a given machine.</b>. This is handled by concurrency control techniques at the DB layer. The options are:
+- Optimistic Concurrency Control
+- Pessimistic Concurrency Control
+  
+Learn more @ https://www.youtube.com/watch?v=D3XhDu--uoI
 
 ## Problems
 Check out the README at https://github.com/harippriyas/multithreading/tree/main/multithreading
