@@ -56,7 +56,7 @@ public class ProducerConsumer {
             executor.submit(()->obj.put(UUID.randomUUID().toString()));
             executor.submit(()->obj.take());
         }
-        executor.shutdown();ew Thread(()->obj.take())).start();
+        executor.shutdown();
     }
 
 }
